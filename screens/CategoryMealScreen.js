@@ -1,23 +1,41 @@
 import React from "react";
-import { StyleSheet, Text, View, Button } from "react-native";
+import { StyleSheet, Text, View, Button, FlatList } from "react-native";
+import MealItem from "../components/MealItem";
 
-import { CATEGORIES } from "../data/dummy-data";
+import { CATEGORIES, MEALS } from "../data/dummy-data";
 
 const CategoryMealScreen = (props) => {
+  const renderMealItem = (itemData) => {
+    return (
+      <MealItem
+        title={itemData.item.title}
+        onSelectMeal={() => {
+          props.navigation.navigate("MealDetail", {
+            mealId: itemData.item.id,
+          });
+        }}
+        duration={itemData.item.duration}
+        affordability={itemData.item.affordability}
+        complexity={itemData.item.complexity}
+        image={itemData.item.imageUrl}
+      />
+    );
+  };
+
   const catId = props.navigation.getParam("categoryId");
 
-  const selectedCategory = CATEGORIES.find((cat) => cat.id === catId);
+  const displayedMeals = MEALS.filter(
+    (meal) => meal.categoryIds.indexOf(catId) >= 0
+  );
 
   return (
     <View style={styles.screen}>
-      <Text>The Category meal Screen</Text>
-      <Text>{selectedCategory.title}</Text>
-      <Button
-        title="go to Detail"
-        onPress={() => props.navigation.navigate("MealDetail")}
+      <FlatList
+        data={displayedMeals}
+        keyExtractor={(item) => item.id}
+        renderItem={renderMealItem}
+        style={{ width: "100%" }}
       />
-
-      <Button title="go Back" onPress={() => props.navigation.goBack()} />
     </View>
   );
 };
@@ -25,7 +43,7 @@ const CategoryMealScreen = (props) => {
 CategoryMealScreen.navigationOptions = (navigationData) => {
   const catId = navigationData.navigation.getParam("categoryId");
   const selectedCategory = CATEGORIES.find((cat) => cat.id === catId);
-  console.log(catId);
+
   return {
     headerTitle: selectedCategory.title,
   };
@@ -38,5 +56,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 10,
   },
 });
